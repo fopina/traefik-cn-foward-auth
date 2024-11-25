@@ -3,7 +3,7 @@ module github.com/fopina/golang-template
 go 1.21
 
 require (
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 )
 
