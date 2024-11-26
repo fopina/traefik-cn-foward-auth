@@ -12,6 +12,7 @@ permissions:
 jobs:
   test:
     uses: ./.github/workflows/test.yml
+    secrets: inherit
 
   goreleaser:
     runs-on: ubuntu-latest
