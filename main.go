@@ -7,7 +7,7 @@ import (
 	"github.com/fopina/golang-template/cmd"
 )
 
-var version = ""
+var version = "dev"
 
 func main() {
 	if err := cmd.Execute(version); err != nil {

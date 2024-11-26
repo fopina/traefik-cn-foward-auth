@@ -1,4 +1,4 @@
-projectname?=golang-cli-template
+projectname?=golang-template
 
 default: help
 
@@ -32,15 +32,10 @@ clean: ## clean up environment
 	@rm -rf coverage.out dist/ $(projectname)
 
 PHONY: cover
-cover: ## display test coverage
+race: ## display test coverage with race
 	go test -v -race $(shell go list ./... | grep -v /vendor/) -v -coverprofile=coverage.out
 	go tool cover -func=coverage.out
 
-PHONY: fmt
-fmt: ## format go files
-	gofumpt -w .
-	gci write .
-
-PHONY: lint
-lint: ## lint go files
-	golangci-lint run -c .golang-ci.yml
+PHONY: snapshot
+snapshot: ## goreleaser snapshot
+	goreleaser release --snapshot --clean
