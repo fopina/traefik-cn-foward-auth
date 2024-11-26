@@ -1,4 +1,4 @@
-module github.com/fopina/golang-template
+module github.com/fopina/traefik-cn-foward-auth
 
 go 1.21
 

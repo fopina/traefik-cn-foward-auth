@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fopina/golang-template/cmd"
+	"github.com/fopina/traefik-cn-foward-auth/cmd"
 )
 
 var version = "dev"

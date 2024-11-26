@@ -1,14 +1,10 @@
 ## Build
 
-This project uses a `Pipfile`, so set up the virtualenv by running
+No unusual build dependencies, `go run main.go` works.
 
-```
-pipenv install --dev
-```
+Always use `make test` to make sure all tests pass before pushing.
 
-Use `make test` to make sure all tests pass before pushing.
-
-Use `make lint` to make sure lint check passes before pushing.
+Use `make snapshot` to make sure goreleaser properly builds everything (including docker image)
 
 ## Guidelines
 

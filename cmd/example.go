@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/fopina/golang-template/internal/convert"
-	"github.com/fopina/golang-template/pkg/example"
+	"github.com/fopina/traefik-cn-foward-auth/internal/convert"
+	"github.com/fopina/traefik-cn-foward-auth/pkg/example"
 	"github.com/spf13/cobra"
 )
 
