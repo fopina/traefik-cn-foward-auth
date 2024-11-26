@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fopina/golang-template/cmd"
+	"github.com/fopina/traefik-cn-foward-auth/cmd"
 )
 
-var version = ""
+var version = "dev"
 
 func main() {
 	if err := cmd.Execute(version); err != nil {
-		fmt.Fprintf(os.Stderr, "%v", err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 }
