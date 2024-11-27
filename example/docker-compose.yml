@@ -25,6 +25,13 @@ services:
     image: traefik:v2.9
     depends_on:
       - setup
+    networks:
+      default:
+        aliases:
+          # just for running bats tests within container network
+          # same hostnames also work outside, on different port :)
+          - whoami.7f000001.nip.io
+          - whoami-mtls.7f000001.nip.io
     command:
       - --api.insecure=true
       - --providers.docker=true
@@ -43,16 +50,16 @@ services:
   whoami:
     image: traefik/whoami
     labels:
-      traefik.http.routers.whoami.entrypoints: web
       traefik.http.services.whoami.loadbalancer.server.port: 80
-      traefik.http.routers.whoami.rule: Host(`whoami.7f000001.nip.io`)
       traefik.http.routers.whoamix.rule: Host(`whoami.7f000001.nip.io`)
       traefik.http.routers.whoamix.entrypoints: webtls
       traefik.http.routers.whoamix.tls: "true"
       traefik.http.middlewares.pass-certificate-info.passTLSClientCert.info.subject.commonName: 'true'
-      traefik.http.middlewares.allow-cns-header.headers.customrequestheaders.X-Allow-CN: Subject%3D%22CN%3Dauth-client%22,Subject%3D%22CN%3Dauth2-client%22
+      # set X-Allow-CN header to comma-separated list of common names
+      # some TLS clients will send both CNs (certificate and CA), need to add both values for each client CN...
+      traefik.http.middlewares.allow-cns-header.headers.customrequestheaders.X-Allow-CN: Subject%3D%22CN%3Dauth-client%22,Subject%3D%22CN%3Dauth-client%22%2CSubject%3D%22CN%3Dgood-one%22,Subject%3D%22CN%3Dauth2-client%22,Subject%3D%22CN%3Dauth2-client%22%2CSubject%3D%22CN%3Dgood-one%22
       traefik.http.middlewares.validate-cn.forwardauth.address: http://validate-cn:8080/
-      traefik.http.routers.whoamix2.rule: Host(`whoami-tls.7f000001.nip.io`)
+      traefik.http.routers.whoamix2.rule: Host(`whoami-mtls.7f000001.nip.io`)
       traefik.http.routers.whoamix2.entrypoints: webtls
       traefik.http.routers.whoamix2.tls: "true"
       traefik.http.routers.whoamix2.tls.options: mtlsTest@file
@@ -63,3 +70,16 @@ services:
       context: ../
       dockerfile: example/Dockerfile.build
     command: --debug
+
+  test:
+    # run bats tests to assert everything is as expected!
+    depends_on:
+    - traefik
+    - whoami
+    - validate-cn
+    build:
+      context: .
+      dockerfile: Dockerfile.tests
+    command: ./tests.bats
+    volumes:
+      - ./:/tests:ro
