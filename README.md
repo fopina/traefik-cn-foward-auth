@@ -1,11 +1,11 @@
 # traefik-cn-foward-auth
 
 [![goreference](https://pkg.go.dev/badge/github.com/fopina/traefik-cn-foward-auth.svg)](https://pkg.go.dev/github.com/fopina/traefik-cn-foward-auth)
-[![release](https://img.shields.io/github/v/release/fopina/golang-template)](https://github.com/fopina/traefik-cn-foward-auth/releases)
-[![downloads](https://img.shields.io/github/downloads/fopina/golang-template/total.svg)](https://github.com/fopina/traefik-cn-foward-auth/releases)
+[![release](https://img.shields.io/github/v/release/fopina/traefik-cn-foward-auth)](https://github.com/fopina/traefik-cn-foward-auth/releases)
+[![downloads](https://img.shields.io/github/downloads/fopina/traefik-cn-foward-auth/total.svg)](https://github.com/fopina/traefik-cn-foward-auth/releases)
 [![ci](https://github.com/fopina/traefik-cn-foward-auth/actions/workflows/publish-main.yml/badge.svg)](https://github.com/fopina/traefik-cn-foward-auth/actions/workflows/publish-main.yml)
 [![test](https://github.com/fopina/traefik-cn-foward-auth/actions/workflows/test.yml/badge.svg)](https://github.com/fopina/traefik-cn-foward-auth/actions/workflows/test.yml)
-[![codecov](https://codecov.io/github/fopina/golang-template/graph/badge.svg)](https://codecov.io/github/fopina/golang-template)
+[![codecov](https://codecov.io/github/fopina/traefik-cn-foward-auth/graph/badge.svg)](https://codecov.io/github/fopina/traefik-cn-foward-auth)
 
 Simple HTTP service to validate TLS Info header using Forward Auth middleware.
 

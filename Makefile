@@ -1,4 +1,4 @@
-projectname?=golang-template
+projectname?=traefik-cn-foward-auth
 
 default: help
 
