@@ -1,0 +1,7 @@
+# default dockerfile is used by goreleaser, so it does not build it...
+FROM goreleaser/goreleaser:v2.4.8
+
+WORKDIR /traefik-cn-foward-auth
+RUN --mount=type=bind,target=/traefik-cn-foward-auth,readwrite \
+    goreleaser build --snapshot --clean --single-target -o /usr/bin/traefik-cn-foward-auth
+ENTRYPOINT ["/usr/bin/traefik-cn-foward-auth"]
