@@ -12,10 +12,9 @@ func TestValidateValue(t *testing.T) {
 	assert.True(t, ValidateValue("ehlo", "helo|ehlo", "|"))
 }
 
-func TestValidateValueAllowedJSON(t *testing.T) {
-	assert.True(t, validateValueAllowedJSON("ehlo", `["helo","ehlo"]`))
+func TestValidateValueJSON(t *testing.T) {
 	assert.True(t, ValidateValue("ehlo", `["helo","ehlo"]`, "json"))
-	assert.False(t, validateValueAllowedJSON("ehlo", `["helo"]`))
+	assert.False(t, ValidateValue("ehlo", `["helo"]`, "json"))
 	// invalid json
 	assert.False(t, ValidateValue("ehlo", `["helo","ehlo"`, "json"))
 }

@@ -14,6 +14,7 @@ type runOptions struct {
 	allowHeaderName      string
 	allowHeaderSeparator string
 	debug                bool
+	raw                  bool
 	cmd                  *cobra.Command
 }
 
@@ -34,9 +35,10 @@ func newRootCmd(version string) *cobra.Command {
 
 	cmd.Flags().StringVarP(&o.bindAddress, "bind-addr", "b", o.bindAddress, `Address to bind the web server to`)
 	cmd.Flags().StringVarP(&o.headerName, "header", "n", o.headerName, `Name of the header with values to be validated`)
-	cmd.Flags().StringVarP(&o.allowHeaderName, "allow-header", "a", o.allowHeaderName, `Name of the header that will container a list of allowed values`)
+	cmd.Flags().StringVarP(&o.allowHeaderName, "allow-header", "a", o.allowHeaderName, `Name of the header that will container a list of allowed common names - or raw values, if --raw`)
 	cmd.Flags().StringVarP(&o.allowHeaderSeparator, "allow-header-separator", "s", o.allowHeaderSeparator, `Separator character of the values in allow-header. Use special value "json" if you prefer to use a JSON string array to specify the list`)
 	cmd.Flags().BoolVar(&o.debug, "debug", true, `Log all failed validations to help debug`)
+	cmd.Flags().BoolVar(&o.raw, "raw", true, `By default, values in --allow-header are expected to be the common names, eg: for "CN=mobile01,OU=..." it should have "mobile01". Using --raw no such parsing is done and allowed values are expected to match exactly the value sent in --header`)
 
 	return cmd
 }
@@ -56,7 +58,7 @@ func (o *runOptions) handler(w http.ResponseWriter, r *http.Request) {
 	allowed := r.Header.Get(o.allowHeaderName)
 	// forbidden by default (if either of the headers is missing)
 	if (value != "") && (allowed != "") {
-		if validator.ValidateValue(value, allowed, o.allowHeaderSeparator) {
+		if o.validateValue(value, allowed) {
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, "OK")
 			return
@@ -67,6 +69,13 @@ func (o *runOptions) handler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusForbidden)
 	fmt.Fprint(w, "Forbidden")
+}
+
+func (o *runOptions) validateValue(value, allowed string) bool {
+	if o.raw {
+		return validator.ValidateValue(value, allowed, o.allowHeaderSeparator)
+	}
+	return validator.ValidateCommonName(value, allowed, o.allowHeaderSeparator)
 }
 
 // Execute invokes the command.
