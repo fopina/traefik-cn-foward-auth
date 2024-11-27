@@ -13,6 +13,8 @@ type runOptions struct {
 	headerName           string
 	allowHeaderName      string
 	allowHeaderSeparator string
+	debug                bool
+	cmd                  *cobra.Command
 }
 
 func defaultRunOptions() *runOptions {
@@ -34,11 +36,13 @@ func newRootCmd(version string) *cobra.Command {
 	cmd.Flags().StringVarP(&o.headerName, "header", "n", o.headerName, `Name of the header with values to be validated`)
 	cmd.Flags().StringVarP(&o.allowHeaderName, "allow-header", "a", o.allowHeaderName, `Name of the header that will container a list of allowed values`)
 	cmd.Flags().StringVarP(&o.allowHeaderSeparator, "allow-header-separator", "s", o.allowHeaderSeparator, `Separator character of the values in allow-header. Use special value "json" if you prefer to use a JSON string array to specify the list`)
+	cmd.Flags().BoolVar(&o.debug, "debug", true, `Log all failed validations to help debug`)
 
 	return cmd
 }
 
 func (o *runOptions) run(cmd *cobra.Command, args []string) error {
+	o.cmd = cmd
 	http.HandleFunc("/", o.handler)
 	cmd.Printf("Starting server on %s\n", o.bindAddress)
 	if err := http.ListenAndServe(o.bindAddress, nil); err != nil {
@@ -57,6 +61,9 @@ func (o *runOptions) handler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "OK")
 			return
 		}
+	}
+	if o.debug {
+		o.cmd.Printf("REJECT: Value - %s / Allowed - %s\n", value, allowed)
 	}
 	w.WriteHeader(http.StatusForbidden)
 	fmt.Fprint(w, "Forbidden")
