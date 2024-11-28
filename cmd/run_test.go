@@ -30,6 +30,8 @@ func TestHandlerRaw(t *testing.T) {
 	rr := httptest.NewRecorder()
 	options := defaultRunOptions()
 	options.Raw = true
+	options.Debug = true
+	options.cmd = newRootCmd("")
 	handler := http.HandlerFunc(options.handler)
 
 	req, err := http.NewRequest("GET", "/", nil)
@@ -56,6 +58,8 @@ func TestHandlerRaw(t *testing.T) {
 func TestHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 	options := defaultRunOptions()
+	options.Debug = true
+	options.cmd = newRootCmd("")
 	handler := http.HandlerFunc(options.handler)
 
 	req, err := http.NewRequest("GET", "/", nil)
