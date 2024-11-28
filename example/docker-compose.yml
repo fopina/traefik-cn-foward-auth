@@ -32,6 +32,7 @@ services:
           # same hostnames also work outside, on different port :)
           - whoami.7f000001.nip.io
           - whoami-mtls.7f000001.nip.io
+          - whoami-mtls-raw.7f000001.nip.io
     command:
       - --api.insecure=true
       - --providers.docker=true
@@ -55,16 +56,33 @@ services:
       traefik.http.routers.whoamix.entrypoints: webtls
       traefik.http.routers.whoamix.tls: "true"
       traefik.http.middlewares.pass-certificate-info.passTLSClientCert.info.subject.commonName: 'true'
-      # set X-Allow-CN header to comma-separated list of common names
-      # some TLS clients will send both CNs (certificate and CA), need to add both values for each client CN...
-      traefik.http.middlewares.allow-cns-header.headers.customrequestheaders.X-Allow-CN: Subject%3D%22CN%3Dauth-client%22,Subject%3D%22CN%3Dauth-client%22%2CSubject%3D%22CN%3Dgood-one%22,Subject%3D%22CN%3Dauth2-client%22,Subject%3D%22CN%3Dauth2-client%22%2CSubject%3D%22CN%3Dgood-one%22
-      traefik.http.middlewares.validate-cn.forwardauth.address: http://validate-cn:8080/
-      traefik.http.routers.whoamix2.rule: Host(`whoami-mtls.7f000001.nip.io`)
-      traefik.http.routers.whoamix2.entrypoints: webtls
-      traefik.http.routers.whoamix2.tls: "true"
-      traefik.http.routers.whoamix2.tls.options: mtlsTest@file
-      traefik.http.routers.whoamix2.middlewares: pass-certificate-info,allow-cns-header,validate-cn
 
+      # TESTING commonName (default mode)
+      traefik.http.middlewares.allow-cns.headers.customrequestheaders.X-Allow-CN: auth-client,auth2-client
+      traefik.http.middlewares.validate-cn.forwardauth.address: http://validate-cn:8080/
+      traefik.http.routers.whoamix-cn.rule: Host(`whoami-mtls.7f000001.nip.io`)
+      traefik.http.routers.whoamix-cn.entrypoints: webtls
+      traefik.http.routers.whoamix-cn.tls: "true"
+      traefik.http.routers.whoamix-cn.tls.options: mtlsTest@file
+      traefik.http.routers.whoamix-cn.middlewares: pass-certificate-info,allow-cns,validate-cn
+
+      # TESTING --raw
+      # set X-Allow-CN header to comma-separated list of common names
+      # TLS clients might send the full chain (peer certificate and CA) and Traefik will add the CN of all of them to the header
+      traefik.http.middlewares.allow-cn-headers.headers.customrequestheaders.X-Allow-CN: Subject%3D%22CN%3Dauth-client%22,Subject%3D%22CN%3Dauth-client%22%2CSubject%3D%22CN%3Dgood-one%22,Subject%3D%22CN%3Dauth2-client%22,Subject%3D%22CN%3Dauth2-client%22%2CSubject%3D%22CN%3Dgood-one%22
+      traefik.http.middlewares.validate-raw.forwardauth.address: http://validate-cn-raw:8080/
+      traefik.http.routers.whoamix-raw.rule: Host(`whoami-mtls-raw.7f000001.nip.io`)
+      traefik.http.routers.whoamix-raw.entrypoints: webtls
+      traefik.http.routers.whoamix-raw.tls: "true"
+      traefik.http.routers.whoamix-raw.tls.options: mtlsTest@file
+      traefik.http.routers.whoamix-raw.middlewares: pass-certificate-info,allow-cn-headers,validate-raw
+
+  validate-cn-raw:
+    build:
+      context: ../
+      dockerfile: example/Dockerfile.build
+    command: --debug --raw
+  
   validate-cn:
     build:
       context: ../
@@ -77,9 +95,10 @@ services:
     - traefik
     - whoami
     - validate-cn
+    - validate-cn-raw
     build:
       context: .
       dockerfile: Dockerfile.tests
-    command: ./tests.bats
+    command: ./wrapper.bats
     volumes:
       - ./:/tests:ro
