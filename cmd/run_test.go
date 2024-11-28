@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,9 +26,10 @@ func TestRunCommand(t *testing.T) {
 	assert.Equal(t, "traefik-cn-foward-auth version v0.0.0\n", string(out))
 }
 
-func TestHandler(t *testing.T) {
+func TestHandlerRaw(t *testing.T) {
 	rr := httptest.NewRecorder()
 	options := defaultRunOptions()
+	options.raw = true
 	handler := http.HandlerFunc(options.handler)
 
 	req, err := http.NewRequest("GET", "/", nil)
@@ -46,6 +48,32 @@ func TestHandler(t *testing.T) {
 	rr = httptest.NewRecorder()
 	req.Header.Set(options.headerName, "X")
 	req.Header.Set(options.allowHeaderName, "Y")
+	handler.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusForbidden, rr.Code)
+	assert.Equal(t, "Forbidden", rr.Body.String())
+}
+
+func TestHandler(t *testing.T) {
+	rr := httptest.NewRecorder()
+	options := defaultRunOptions()
+	handler := http.HandlerFunc(options.handler)
+
+	req, err := http.NewRequest("GET", "/", nil)
+	require.NoError(t, err)
+	handler.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusForbidden, rr.Code)
+	assert.Equal(t, "Forbidden", rr.Body.String())
+
+	rr = httptest.NewRecorder()
+	req.Header.Set(options.headerName, url.QueryEscape("Subject=\"CN=me\""))
+	req.Header.Set(options.allowHeaderName, "me,you")
+	handler.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, "OK", rr.Body.String())
+
+	rr = httptest.NewRecorder()
+	req.Header.Set(options.headerName, url.QueryEscape("Subject=\"CN=me\""))
+	req.Header.Set(options.allowHeaderName, "you")
 	handler.ServeHTTP(rr, req)
 	assert.Equal(t, http.StatusForbidden, rr.Code)
 	assert.Equal(t, "Forbidden", rr.Body.String())
